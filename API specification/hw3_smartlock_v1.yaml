@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: SmartDoorAuthentication API
   description: 'Smart Door Authentication application, built during the Cloud Computing course at New York University.'
-  version: 1.0.0
+  version: 1.0.2
 schemes:
   - https
 basePath: /v1
@@ -63,6 +63,26 @@ paths:
           schema:
             $ref: '#/definitions/Error'
             
+  /askpermission:
+    post:
+      summary: trigger LF1 to takes photos and store to S3 and DB
+      tags:
+        - WP1
+      responses:
+        '200':
+          description: Server response
+          schema:
+            $ref: '#/definitions/ServerResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        
+        
   /photos/{photoid}:
     get:
       summary: get visitor's photo
@@ -94,6 +114,8 @@ definitions:
   visitorForm:
     type: object
     properties:
+      accept:
+        type: boolean
       firstname:
         type: string
       lastname:
