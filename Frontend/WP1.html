@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset= "utf-8">
+    <meta content="text/html" http-equiv="Content-Type"/>
+    <title> Visitor Information </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+
+    <script type="text/javascript" src="js/lib/axios/dist/axios.standalone.js"></script>
+    <script type="text/javascript" src="js/lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script type="text/javascript" src="js/lib/CryptoJS/rollups/sha256.js"></script>
+    <script type="text/javascript" src="js/lib/CryptoJS/components/hmac.js"></script>
+    <script type="text/javascript" src="js/lib/CryptoJS/components/enc-base64.js"></script>
+    <script type="text/javascript" src="js/lib/url-template/url-template.js"></script>
+    <script type="text/javascript" src="js/lib/apiGatewayCore/sigV4Client.js"></script>
+    <script type="text/javascript" src="js/lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script type="text/javascript" src="js/lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script type="text/javascript" src="js/lib/apiGatewayCore/utils.js"></script>
+    <script type="text/javascript" src="js/apigClient.js"></script>
+
+    <script src = "WP1.js">
+    </script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body> 
+    <div align="center">
+        <img src = "./UnknownFace.jpg" alt = "" width = "400" height = "300"><br><br>
+        <label for="name">Name of Visitor:</label>
+        <input type="text" id="visitor-name" name="name" placeholder="Firstname Lastname"><br>
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone-number" name="phoneNumber" placeholder="+1 ..."><br><br>
+        <input type="submit" value="Deny" onclick = "deny()"><br>
+        <input type="submit" value="Allow" onclick = "allow()"><br><br>
+    </div>
+    
+
+
+</body>
+</html>
