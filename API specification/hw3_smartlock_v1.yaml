@@ -1,0 +1,140 @@
+swagger: '2.0'
+info:
+  title: SmartDoorAuthentication API
+  description: 'Smart Door Authentication application, built during the Cloud Computing course at New York University.'
+  version: 1.0.0
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /visitor:
+    post:
+      summary: The endpoint for create a new user.
+      description: |
+        This API create a new visitor by post the visitor's information
+      tags:
+        - WP1
+      operationId: newVisitor
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/visitorForm'
+      responses:
+        '200':
+          description: Server response
+          schema:
+            $ref: '#/definitions/ServerResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /lock:
+    post:
+      summary: post lock password to server
+      tags:
+        - WP2
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/doorPasswd'
+      responses:
+        '200':
+          description: Server response
+          schema:
+            $ref: '#/definitions/ServerResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /photos/{photoid}:
+    get:
+      summary: get visitor's photo
+      parameters:
+      - name: photoid
+        description: the photo identifier, as photoid 
+        in: path
+        required: true
+        type: string
+        format: uuid
+        
+      responses:
+        '200':
+          description: photo response
+          schema:
+            $ref: '#/definitions/photoResponse'
+        '403':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      
+      
+definitions:
+  visitorForm:
+    type: object
+    properties:
+      username:
+        type: string
+      phonenumber:
+        type: string
+      photoid:
+        type: string
+        format: uuid
+       
+  doorPasswd:
+    type: object
+    properties:
+      passwd: 
+        type: string
+        format: password
+      timestamp:
+        type: string
+        format: datetime
+  
+  photoResponse:
+    type: object
+    properties:
+      photoid:
+        type: string
+        format: uuid
+      url:
+        type: string
+        format: url
+        
+  ServerResponse:
+    type: object
+    properties:
+      code: 
+        type: integer
+        format: int32
+      message:
+        type: string
+      
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
