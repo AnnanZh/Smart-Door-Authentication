@@ -73,7 +73,8 @@ paths:
         required: true
         type: string
         format: uuid
-        
+      tags: 
+        - WP1
       responses:
         '200':
           description: photo response
@@ -93,7 +94,9 @@ definitions:
   visitorForm:
     type: object
     properties:
-      username:
+      firstname:
+        type: string
+      lastname:
         type: string
       phonenumber:
         type: string
