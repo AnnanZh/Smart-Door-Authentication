@@ -1,6 +1,8 @@
+from email import message
 import json
 import base64
 import boto3
+from numpy.testing._private.parameterized import param
 import cv2
 import random
 import uuid
@@ -10,9 +12,17 @@ from botocore.exceptions import ClientError
 def generateOTP():
     return random.randint(100000,999999)
 
-def sendSES(otp, visitor_name):
-    ses = boto3.client('ses', region_name = 'us-east-1')
+def send_otp_ses(otp, visitor_name):
     message = f"Hello, Welcome In, {visitor_name}! Your OTP is: {otp} "
+    sendSES(message)
+
+def send_unknowface_url(url):
+    message = f"You have a new unknow visitor, {url}"
+    sendSES(message)
+
+def sendSES(message):
+    ses = boto3.client('ses', region_name = 'us-east-1')
+    
     CHARSET = "UTF-8"
     try:
         response = ses.send_email(
@@ -45,6 +55,11 @@ def sendSES(otp, visitor_name):
         print("Email sent! Message ID:"),
         print(response['MessageId'])
 
+def form_wp1_url(image_uuid):
+    wp1_url = "https://hw3-websites-owner.s3.amazonaws.com/WP1.html"
+    wp1_url += "?photo_id="
+    wp1_url += str(image_uuid)
+    return wp1_url
 
 def getKinesisAPIEndpoint():
     stream_arn = "arn:aws:kinesisvideo:us-east-1:455006891805:stream/IP_CAM/1604743854978"
@@ -78,7 +93,7 @@ def savePhotoToS3(fragmentNum):
     if success:
         cv2.imwrite(image_temp_path, frame)
         s3_client = boto3.client('s3')
-        s3_client.upload_file(image_temp_path, bucket, image_name)
+        s3_client.upload_file(image_temp_path, bucket, image_name, ExtraArgs={'ACL':'public-read'})
         print(f"image path: \n{image_temp_path}")
         print("upload success")
         return v_uuid
@@ -93,8 +108,6 @@ def save_password_to_db(otp, visitor_name, time_out_value):
             'passwd' : str(otp),
             'expired_time' : expired_time
         })
-    
-
     
 def getEventResult(event):
     for record in event["Records"]:
@@ -118,7 +131,6 @@ def getEventResult(event):
                 return (True, externeImageID, None)
             else:
                 #get fragmentNum for later use
-
                 fragmentNum = json_data['InputInformation']['KinesisVideo']['FragmentNumber']
                 return (False, None, fragmentNum)
 
@@ -129,11 +141,11 @@ def lambda_handler(event, context):
     if success:
         otp = generateOTP()
         save_password_to_db(otp, visitor_name, 300)
-        sendSES(generateOTP(), visitor_name)
+        send_otp_ses(otp, visitor_name)
     else:
-        # owner_url = "https://hw3-websites-owner.s3.amazonaws.com/WP1.html"
-        # param = 
-        savePhotoToS3(framentNum)
+        image_uuid = savePhotoToS3(framentNum)
+        url = form_wp1_url(image_uuid)
+        send_unknowface_url(url)
     return {
         'statusCode': 200,
         'body': json.dumps("Hello world")
