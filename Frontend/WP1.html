@@ -20,16 +20,14 @@
     <script type="text/javascript" src="js/lib/apiGatewayCore/apiGatewayClient.js"></script>
     <script type="text/javascript" src="js/lib/apiGatewayCore/simpleHttpClient.js"></script>
     <script type="text/javascript" src="js/lib/apiGatewayCore/utils.js"></script>
-    <script type="text/javascript" src="js/apigClient.js"></script>
-
-    <script src = "WP1.js">
+    <script type="text/javascript" src="js/apigClient.js"></script> 
     </script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body> 
     <div align="center">
-        <img src = "./UnknownFace.jpg" alt = "" width = "400" height = "300"><br><br>
+        <img id ="start_img" src = "./UnknownFace.jpg"><br><br>
         <label for="name">Name of Visitor:</label>
         <input type="text" id="visitor-name" name="name" placeholder="Firstname Lastname"><br>
         <label for="phone">Phone Number:</label>
@@ -37,8 +35,6 @@
         <input type="submit" value="Deny" onclick = "deny()"><br>
         <input type="submit" value="Allow" onclick = "allow()"><br><br>
     </div>
-    
-
-
+    <script src = "WP1.js"></script>
 </body>
 </html>

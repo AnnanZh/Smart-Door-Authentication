@@ -1,5 +1,30 @@
+var start_img = document.getElementById("start_img");
+
+init()
+function init(){
+    console.log("connected");
+    let photo_uuid = get_image_uuid();
+    if (photo_uuid!=""){
+        var url = get_image_url(photo_uuid);
+        console.log(url)
+        start_img.src=url;
+    }
+}
+
+function get_image_uuid(){
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const photo_uuid = urlParams.get('photo_id');
+    return photo_uuid;
+}
+
+function get_image_url(photo_uuid){
+    var url = "https://hw3-test-photos.s3.amazonaws.com/";
+    url = url+photo_uuid+".jpg";
+    return url;
+}
+
 function allow() {
-        
     var visitor = document.getElementById('name').value.trim().toLowerCase();
     console.log(visitor)
     var phone = document.getElementById('phoneNumber').value;
@@ -12,6 +37,7 @@ function allow() {
         'message' : {    
                     'firstname': visitor,
                     'phonenumber': phone,
+                    'image_uuid': get_image_uuid,
                 }
         }
 
