@@ -1,32 +1,35 @@
 function on_submit() {
-            
+    console.log(document.getElementById("OTP").value);
     var apigClient = apigClientFactory.newClient();
     var params = {
-        //This is where any header, path, or querystring request params go.
+        'Content-type': 'application/json',
+        'Access-Control-Allow-Headers' : 'Content-Type',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+        "Access-Control-Allow-Credentials": 'true'
     };
-
-    var link = window.location.href;
-    var faceId
-
-    if(link){
-        params = link.split('?')[1]
-        temp = params.split('=')
-        if(temp[0] == "faceId")
-            faceId = temp[1]  
-    }
     var body = {
-        //This is where you define the body of the request
         'message': {
-            'otp': document.getElementById("OTP").value,
-            'faceId' : faceId
+            'passwd': document.getElementById("OTP").value,
+            'timestamp': ""
         }
     }
     var additionalParams = {}
 
-    apigClient.oTPValidatePost(params, body, additionalParams)
+    apigClient.lockPost(params, body, additionalParams)
         .then(function (result) {
-            alert(result.data.body);
+            alert(result.data);
         }).catch(function (result) {
         //error callback
     });
 };
+
+    // var link = window.location.href;
+    // var faceId
+
+    // if(link){
+    //     params = link.split('?')[1]
+    //     temp = params.split('=')
+    //     if(temp[0] == "faceId")
+    //         faceId = temp[1]  
+    // }
