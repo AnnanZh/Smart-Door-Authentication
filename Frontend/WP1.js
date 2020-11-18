@@ -19,7 +19,7 @@ function get_image_uuid(){
 }
 
 function get_image_url(photo_uuid){
-    var url = "https://hw3-test-photos.s3.amazonaws.com/";
+    var url = "https://hw3-visitor-photos.s3.amazonaws.com//";
     url = url+photo_uuid+".jpg";
     return url;
 }
