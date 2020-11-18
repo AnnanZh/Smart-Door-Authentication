@@ -1,29 +1,25 @@
 function allow() {
         
-    var visitor = document.getElementById('visitor-name').value.trim().toLowerCase();
+    var visitor = document.getElementById('name').value.trim().toLowerCase();
     console.log(visitor)
-    var phone = document.getElementById('phone-number').value.trim().toLowerCase();
+    var phone = document.getElementById('phoneNumber').value;
     console.log(phone)
-    var faceid;
-    
-    console.log(faceid);
-    console.log(s3key)
+
     apigClient = apigClientFactory.newClient();
-    console.log('initialized client')
+
     var params = {};
     var body = {
         'message' : {    
-                        'name': visitor,
-                        'phone': phone,
-                        'fileName': s3key
-                    }
+                    'firstname': visitor,
+                    'phonenumber': phone,
+                }
         }
 
     var additionalParams = {};
 
-    apigClient.visitorCheckPost(params, body, additionalParams)
+    apigClient.visitorPost(params, body, additionalParams)
         .then(function (result) {
-            // alert(result.data.body)
+            alert(result.data)
             // console.log(result)
         }).catch(function (result) {
         //error callback
@@ -31,5 +27,28 @@ function allow() {
 }
 
 function deny(){
-    // send deny message.
+    var visitor = document.getElementById('name').value.trim().toLowerCase();
+    console.log(visitor)
+    var phone = document.getElementById('phoneNumber').value;
+    console.log(phone)
+
+    apigClient = apigClientFactory.newClient();
+
+    var params = {};
+    var body = {
+        'message' : {    
+                    'firstname': visitor,
+                    'phonenumber': phone,
+                }
+        }
+
+    var additionalParams = {};
+
+    apigClient.visitorPost(params, body, additionalParams)
+        .then(function (result) {
+            alert(result.data)
+            // console.log(result)
+        }).catch(function (result) {
+        //error callback
+    });
 }
