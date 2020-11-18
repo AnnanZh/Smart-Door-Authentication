@@ -1,14 +1,24 @@
 var start_img = document.getElementById("start_img");
+var btn_deny = document.getElementById("btn_deny");
+var btn_allow = document.getElementById("btn_allow");
 
-init()
+init();
+
 function init(){
     console.log("connected");
-    let photo_uuid = get_image_uuid();
+    var photo_uuid = get_image_uuid();
     if (photo_uuid!=""){
         var url = get_image_url(photo_uuid);
-        console.log(url)
+        console.log(url);
         start_img.src=url;
     }
+    btn_allow.addEventListener("click", function(){
+        allow();
+    });
+    btn_deny.addEventListener("click", function(){
+        deny();
+    });
+
 }
 
 function get_image_uuid(){
@@ -19,16 +29,16 @@ function get_image_uuid(){
 }
 
 function get_image_url(photo_uuid){
-    var url = "https://hw3-visitor-photos.s3.amazonaws.com//";
+    var url = "https://hw3-visitor-photos.s3.amazonaws.com/";
     url = url+photo_uuid+".jpg";
     return url;
 }
 
 function allow() {
-    var visitor = document.getElementById('name').value.trim().toLowerCase();
-    console.log(visitor)
-    var phone = document.getElementById('phoneNumber').value;
-    console.log(phone)
+    var visitor = document.getElementById('visitor-name').value;
+    console.log(visitor);
+    var phone = document.getElementById('phone-number').value;
+    console.log(phone);
 
     apigClient = apigClientFactory.newClient();
 
@@ -37,15 +47,15 @@ function allow() {
         'message' : {    
                     'firstname': visitor,
                     'phonenumber': phone,
-                    'image_uuid': get_image_uuid,
+                    'image_uuid': get_image_uuid(),
                 }
-        }
+        };
 
     var additionalParams = {};
 
     apigClient.visitorPost(params, body, additionalParams)
         .then(function (result) {
-            alert(result.data)
+            alert(result.data);
             // console.log(result)
         }).catch(function (result) {
         //error callback
@@ -53,28 +63,29 @@ function allow() {
 }
 
 function deny(){
-    var visitor = document.getElementById('name').value.trim().toLowerCase();
-    console.log(visitor)
-    var phone = document.getElementById('phoneNumber').value;
-    console.log(phone)
+    alert("visitor denied");
+    // var visitor = document.getElementById('name').value.trim().toLowerCase();
+    // console.log(visitor)
+    // var phone = document.getElementById('phoneNumber').value;
+    // console.log(phone)
 
-    apigClient = apigClientFactory.newClient();
+    // apigClient = apigClientFactory.newClient();
 
-    var params = {};
-    var body = {
-        'message' : {    
-                    'firstname': visitor,
-                    'phonenumber': phone,
-                }
-        }
+    // var params = {};
+    // var body = {
+    //     'message' : {    
+    //                 'firstname': visitor,
+    //                 'phonenumber': phone,
+    //             }
+    //     }
 
-    var additionalParams = {};
+    // var additionalParams = {};
 
-    apigClient.visitorPost(params, body, additionalParams)
-        .then(function (result) {
-            alert(result.data)
-            // console.log(result)
-        }).catch(function (result) {
-        //error callback
-    });
+    // apigClient.visitorPost(params, body, additionalParams)
+    //     .then(function (result) {
+    //         alert(result.data)
+    //         // console.log(result)
+    //     }).catch(function (result) {
+    //     //error callback
+    // });
 }

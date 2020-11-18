@@ -10,6 +10,9 @@ from botocore.exceptions import ClientError
 from botocore.retries import bucket
 
 def lambda_handler(event, context):
+    
+    print(event)
+    
     # Read Information
     body = event["body"]
     body = json.loads(body)
@@ -19,7 +22,10 @@ def lambda_handler(event, context):
     image_uuid = body["message"]["image_uuid"]
     
     #index face and get face id
-    faceid = add_face_to_collection(image_uuid, visitor_name)
+    trimmed_name = visitor_name
+    trimmed_name = trimmed_name.replace(" ", "")
+    trimmed_name = trimmed_name.lower()
+    faceid = add_face_to_collection(image_uuid, trimmed_name)
 
     # Save Visitor Information to DynamoDB
     dynamodb1 = boto3.resource('dynamodb', region_name='us-east-1')
@@ -33,8 +39,8 @@ def lambda_handler(event, context):
 
     # send message with otp
     # sendSMS(phone, faceid, otp)
-    sendSES(otp)
-    message = "Thank you, the visitor has been added to the database"
+    send_otp_ses(otp, visitor_name)
+    message = f"Thank you, {visitor_name} has been added to the database"
     return {
         'statusCode': 200,
         'body': message
@@ -88,6 +94,8 @@ def save_password_to_db(otp, visitor_name, time_out_value):
 
 def generateOTP():
     return random.randint(100000,999999)
+    
+
 
 def sendSMS(phone, faceid, otp):
     sns = boto3.client(
@@ -102,10 +110,13 @@ def sendSMS(phone, faceid, otp):
             )
     except KeyError:
         print("error in sending sms")
-        
-def sendSES(otp):
+
+def send_otp_ses(otp, visitor_name):
+    message = f"Hello, Welcome In, {visitor_name}! Your OTP is: {otp} "
+    sendSES(message)
+
+def sendSES(message):
     ses = boto3.client('ses', region_name = 'us-east-1')
-    message = "Hello, Welcome In! Your OTP is: " + otp
     CHARSET = "UTF-8"
     try:
         response = ses.send_email(
