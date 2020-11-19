@@ -39,6 +39,8 @@ function allow() {
     console.log(visitor);
     var phone = document.getElementById('phone-number').value;
     console.log(phone);
+    var email = document.getElementById('email').value;
+    console.log(email);
 
     apigClient = apigClientFactory.newClient();
 
@@ -48,6 +50,7 @@ function allow() {
                     'firstname': visitor,
                     'phonenumber': phone,
                     'image_uuid': get_image_uuid(),
+                    'email': email,
                 }
         };
 
@@ -63,7 +66,7 @@ function allow() {
 }
 
 function deny(){
-    alert("visitor denied");
+    alert("visitor is denied");
     // var visitor = document.getElementById('name').value.trim().toLowerCase();
     // console.log(visitor)
     // var phone = document.getElementById('phoneNumber').value;
