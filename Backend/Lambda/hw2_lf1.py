@@ -12,23 +12,23 @@ from botocore.exceptions import ClientError
 def generateOTP():
     return random.randint(100000,999999)
 
-def send_otp_ses(otp, visitor_name):
+def send_otp_ses(otp, visitor_name, visitor_email):
     message = f"Hello, Welcome In, {visitor_name}! Your OTP is: {otp} "
-    sendSES(message)
+    sendSES(message, visitor_email)
 
 def send_unknowface_url(url):
+    email_address = "yx2304@nyu.edu"
     message = f"You have a new unknow visitor, {url}"
-    sendSES(message)
+    sendSES(message, email_address)
 
-def sendSES(message):
+def sendSES(message, email_address):
     ses = boto3.client('ses', region_name = 'us-east-1')
-    
     CHARSET = "UTF-8"
     try:
         response = ses.send_email(
             Destination={
                 'ToAddresses': [
-                    "yx2304@nyu.edu",
+                    email_address,
                 ],
             },
             Message={
@@ -72,7 +72,7 @@ def getKinesisAPIEndpoint():
 def savePhotoToS3(fragmentNum):
     #get kinesis video access permission
     stream_name = "IP_CAM"
-    bucket = 'hw3-test-photos'
+    bucket = 'hw3-visitor-photos'
     v_uuid = uuid.uuid1()
     movie_temp_path = f'/tmp/{v_uuid}.mkv'
     image_temp_path = f"/tmp/{v_uuid}.jpg"
@@ -98,7 +98,7 @@ def savePhotoToS3(fragmentNum):
         print("upload success")
         return v_uuid
         
-def save_password_to_db(otp, visitor_name, time_out_value):
+def save_password_to_db(otp, time_out_value):
     table_name = 'passcodes'
     expired_time = int(datetime.now().timestamp())+ time_out_value
     dynamo = boto3.resource('dynamodb', region_name='us-east-1')
@@ -109,6 +109,26 @@ def save_password_to_db(otp, visitor_name, time_out_value):
             'expired_time' : expired_time
         })
     
+def get_visitor_info(faceid):
+    client = boto3.resource('dynamodb')
+    table = client.Table('smartlockvisitors')
+    item = table.get_item(
+        Key = {'faceid':faceid}
+    )
+    return item['Item']['name'], item['Item']['phone'], item['Item']['email']
+
+def send_sms(otp, phone, visitor_name):
+    sns = boto3.client('sns')
+    message = f"Hello, Welcome In, {visitor_name}! Your OTP is: {otp} "
+    try:
+        response = sns.publish(
+            PhoneNumber = phone,
+            Message = message
+            )
+        print(response)
+    except KeyError:
+        print("error in sending sms")
+
 def getEventResult(event):
     for record in event["Records"]:
         #for each record, save one photo to s3
@@ -128,22 +148,24 @@ def getEventResult(event):
                 print(externeImageID)
                 print(f"stream {stream_uuid}")
                 # fragmentNum = json_data['InputInformation']['KinesisVideo']['FragmentNumber']
-                return (True, externeImageID, None)
+                return (True, externeImageID, None, face_id)
             else:
                 #get fragmentNum for later use
                 fragmentNum = json_data['InputInformation']['KinesisVideo']['FragmentNumber']
-                return (False, None, fragmentNum)
+                return (False, None, fragmentNum, None)
 
 
 def lambda_handler(event, context):
     # TODO implement
-    success, visitor_name, framentNum = getEventResult(event)
+    success, visitor_name, frament_num, face_id = getEventResult(event)
     if success:
         otp = generateOTP()
-        save_password_to_db(otp, visitor_name, 300)
-        send_otp_ses(otp, visitor_name)
+        visitor_name, visitor_phone, visitor_email = get_visitor_info(face_id)
+        save_password_to_db(otp, 300)
+        send_sms(otp, visitor_phone, visitor_name)
+        send_otp_ses(otp, visitor_name, visitor_email)
     else:
-        image_uuid = savePhotoToS3(framentNum)
+        image_uuid = savePhotoToS3(frament_num)
         url = form_wp1_url(image_uuid)
         send_unknowface_url(url)
     return {
