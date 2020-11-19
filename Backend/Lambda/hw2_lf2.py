@@ -1,13 +1,8 @@
 import json
-import logging
 import boto3
-import time
-from datetime import datetime
-from datetime import timedelta
 import random
-from boto3 import client
+from datetime import datetime
 from botocore.exceptions import ClientError
-from botocore.retries import bucket
 
 def lambda_handler(event, context):
     
@@ -20,6 +15,7 @@ def lambda_handler(event, context):
     visitor_name = body["message"]["firstname"]
     phone_number = body["message"]["phonenumber"]
     image_uuid = body["message"]["image_uuid"]
+    email_address = body["message"]["email"]
     
     #index face and get face id
     trimmed_name = visitor_name
@@ -30,7 +26,7 @@ def lambda_handler(event, context):
     # Save Visitor Information to DynamoDB
     dynamodb1 = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb1.Table('smartlockvisitors')
-    putVisitorToDynamoDb(table, faceid, visitor_name, phone_number, image_uuid)
+    putVisitorToDynamoDb(table, faceid, visitor_name, phone_number, email_address, image_uuid)
 
     # Save password to DynamoDB
     otp = generateOTP()
@@ -38,10 +34,13 @@ def lambda_handler(event, context):
     save_password_to_db(otp, visitor_name, time_out_value)
 
     # send message with otp
-    # sendSMS(phone, faceid, otp)
-    send_otp_ses(otp, visitor_name)
+    send_sms(otp, phone_number, visitor_name)
+    send_otp_ses(otp, visitor_name, email_address)
     message = f"Thank you, {visitor_name} has been added to the database"
     return {
+        'headers': { "Access-Control-Allow-Origin" : "*",
+        "Access-Control-Allow-Credentials": True
+        },
         'statusCode': 200,
         'body': message
     }
@@ -66,12 +65,13 @@ def add_face_to_collection(image_uuid, external_image_id):
     return face_id[0]
 
 #Checked
-def putVisitorToDynamoDb(table, faceid, name, phone, photoid):
+def putVisitorToDynamoDb(table, faceid, name, phone, email, photoid):
     table.put_item(
         Item = {
             'faceid': faceid,
             'name': name,
             'phone': phone,
+            'email': email,
             'photos': {
                 'objectKey' : f"{photoid}.jpg",
                 'bucket' : "hw3-visitor-photos",
@@ -94,35 +94,31 @@ def save_password_to_db(otp, visitor_name, time_out_value):
 
 def generateOTP():
     return random.randint(100000,999999)
-    
 
-
-def sendSMS(phone, faceid, otp):
-    sns = boto3.client(
-        'sns',
-        region_name = 'us-east-1')
-    message = "Hello, Welcome In! Your OTP is: " + otp
-    print(message)
+def send_sms(otp, phone, visitor_name):
+    sns = boto3.client('sns')
+    message = f"Hello, Welcome In, {visitor_name}! Your OTP is: {otp} "
     try:
         response = sns.publish(
             PhoneNumber = phone,
             Message = message
             )
+        print(response)
     except KeyError:
         print("error in sending sms")
 
-def send_otp_ses(otp, visitor_name):
+def send_otp_ses(otp, visitor_name, visitor_email):
     message = f"Hello, Welcome In, {visitor_name}! Your OTP is: {otp} "
-    sendSES(message)
+    sendSES(message, visitor_email)
 
-def sendSES(message):
+def sendSES(message, email_address):
     ses = boto3.client('ses', region_name = 'us-east-1')
     CHARSET = "UTF-8"
     try:
         response = ses.send_email(
             Destination={
                 'ToAddresses': [
-                    "yx2304@nyu.edu",
+                    email_address,
                 ],
             },
             Message={
